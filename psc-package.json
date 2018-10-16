@@ -1,0 +1,17 @@
+{
+  "name": "poker",
+  "set": "psc-0.11.7",
+  "source": "https://github.com/purescript/package-sets.git",
+  "depends": [
+    "arrays",
+    "assert",
+    "console",
+    "eff",
+    "enums",
+    "prelude",
+    "psci-support",
+    "random",
+    "spec",
+    "tuples"
+  ]
+}
