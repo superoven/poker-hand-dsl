@@ -8,10 +8,13 @@
     "console",
     "eff",
     "enums",
+    "node-fs-aff",
+    "parsing",
     "prelude",
     "psci-support",
     "random",
     "spec",
+    "strings",
     "tuples"
   ]
 }

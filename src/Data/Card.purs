@@ -2,8 +2,10 @@ module Data.Card where
 
 import Prelude
 
+import Data.Either (Either(..), note)
 import Data.Enum (class Enum)
 import Data.Maybe (Maybe(..))
+import Data.String as S
 
 data Rank
   = Two
@@ -66,6 +68,23 @@ instance showRank :: Show Rank where
     King  -> "K"
     Ace   -> "A"
 
+readRank :: String -> Maybe Rank
+readRank x = case x of
+  "2" -> Just Two
+  "3" -> Just Three
+  "4" -> Just Four
+  "5" -> Just Five
+  "6" -> Just Six
+  "7" -> Just Seven
+  "8" -> Just Eight
+  "9" -> Just Nine
+  "T" -> Just Ten
+  "J" -> Just Jack
+  "Q" -> Just Queen
+  "K" -> Just King
+  "A" -> Just Ace
+  _ -> Nothing
+
 data Suit
   = Clubs
   | Diamonds
@@ -79,6 +98,14 @@ instance showSuit :: Show Suit where
     Diamonds -> "♢ "
     Hearts   -> "♡ "
     Spades   -> "♤ "
+
+readSuit :: String -> Maybe Suit
+readSuit x = case x of
+  "S" -> Just Spades
+  "D" -> Just Diamonds
+  "H" -> Just Hearts
+  "C" -> Just Clubs
+  _ -> Nothing
 
 data Card = Card
   { rank :: Rank
@@ -99,3 +126,9 @@ ordBySuit (Card a) (Card b) = compare a.suit b.suit
 
 card :: Rank -> Suit -> Card
 card rank suit = Card { rank, suit }
+
+readCard :: String -> Either String Card
+readCard s = note ("Failed to parse '" <> s <> "'") do
+  rank <- readRank (S.take 1 s)
+  suit <- readSuit (S.drop 1 s)
+  pure $ card rank suit

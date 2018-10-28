@@ -2,12 +2,14 @@ module Data.Hand where
 
 import Prelude
 
-import Data.NonEmpty (fromNonEmpty, NonEmpty)
 import Control.Alt ((<|>))
 import Data.Array (all, groupBy, length, snoc, sortBy, tail, zip)
-import Data.Card (Card(Card), Rank(Two), Suit, eqByRank, eqBySuit, ordBySuit)
+import Data.Array as A
+import Data.Card (Card(Card), Rank(Two), eqByRank, eqBySuit, ordBySuit, readCard)
+import Data.Either (Either(..))
 import Data.Enum (pred)
 import Data.Maybe (Maybe(..), fromMaybe)
+import Data.NonEmpty (fromNonEmpty, NonEmpty)
 import Data.Tuple (Tuple(..))
 
 newtype Hand = Hand (Array Card)
@@ -18,8 +20,25 @@ instance eqHand :: Eq Hand where
 instance ordHand :: Ord Hand where
   compare a b = compare (getHandRank a) (getHandRank b)
 
+parseHand :: Array String -> Either String Hand
+parseHand [s1, s2, s3, s4, s5] = do
+  c1 <- readCard s1
+  c2 <- readCard s2
+  c3 <- readCard s3
+  c4 <- readCard s4
+  c5 <- readCard s5
+  pure $ hand c1 c2 c3 c4 c5
+parseHand xs = Left $ "Failed to parse hand of values '" <> show xs <> "'"
+
 hand :: Card -> Card -> Card -> Card -> Card -> Hand
 hand c1 c2 c3 c4 c5 = Hand $ sortBy (flip compare) [c1, c2, c3, c4, c5]
+
+readAllHands :: Array String -> Either String (Array Ordering)
+readAllHands [] = pure []
+readAllHands textFileValues = do
+  first <- parseHand (A.take 5 textFileValues)
+  second <- parseHand $ (A.take 5 <<< A.drop 5) textFileValues
+  pure [compare first second] <> (readAllHands <<< A.drop 10) textFileValues
 
 toArray :: NonEmpty Array Card -> Array Card
 toArray = fromNonEmpty (flip snoc)
@@ -109,7 +128,7 @@ isStraight (Hand cards@[(Card a), _, _, _, _]) =
     pairs xs = case tail xs of
       Nothing -> []
       Just t  -> zip xs t
-    checkFunc (Tuple (Card a) (Card b)) = pred a.rank == Just b.rank
+    checkFunc (Tuple (Card x) (Card y)) = pred x.rank == Just y.rank
     isConsecutive xs = all checkFunc (pairs xs)
 isStraight _ = Nothing
 
